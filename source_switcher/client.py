@@ -79,3 +79,19 @@ class MetabaseClient:
         r = self.get(f"/api/table/{table_id}/query_metadata")
         r.raise_for_status()
         return r.json()
+
+    # Dashboard methods
+    def fetch_dashboard(self, dashboard_id: int) -> Dict[str, Any]:
+        r = self.get(f"/api/dashboard/{dashboard_id}")
+        r.raise_for_status()
+        return r.json()
+
+    def create_dashboard(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        r = self.post("/api/dashboard", json=payload)
+        r.raise_for_status()
+        return r.json()
+
+    def update_dashboard(self, dashboard_id: int, payload: Dict[str, Any]) -> Dict[str, Any]:
+        r = self.put(f"/api/dashboard/{dashboard_id}", json=payload)
+        r.raise_for_status()
+        return r.json()

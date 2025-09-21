@@ -23,7 +23,9 @@ Set your API key (recommended):
 export METABASE_API_KEY='your_key_here'
 ```
 
-Run the CLI (single-command app; no subcommand):
+Run the CLI (single-command app; no subcommand). Provide exactly one of --question-id or --dashboard-id.
+
+Switch a question:
 ```bash
 python -m source_switcher.cli \
   --host https://metabase.example.com \
@@ -36,13 +38,22 @@ python -m source_switcher.cli \
   [--dry-run]
 ```
 
+Switch a dashboard (and all its questions):
+```bash
+python -m source_switcher.cli \
+  --host https://metabase.example.com \
+  --api-key "$METABASE_API_KEY" \
+  --source-db-id 2 \
+  --target-db-id 5 \
+  --dashboard-id 456 \
+  --collection-id root \
+  [--insecure] \
+  [--dry-run]
+```
+
 Behavior:
-- Duplicates the original question for safety (by POSTing a copy with a new name).
-- Loads source/target metadata; remaps:
-  - Top-level `query.source-table` to the target table with the same `schema.table`.
-  - All MBQL field references `["field", <id>, ...]` to the corresponding field id in the target DB by `schema.table.field` path.
-  - Any nested `source-field` integers within MBQL option objects.
-- Creates a new question with the transformed `dataset_query` and original visualization settings.
+- **Question mode**: Duplicates the original question for safety (by POSTing a copy with a new name). Loads source/target metadata; remaps top-level `query.source-table`, MBQL field references `["field", <id>, ...]`, and nested `source-field` integers to corresponding IDs in the target DB by `schema.table.field` path. Creates a new question with transformed `dataset_query` and original visualization settings.
+- **Dashboard mode**: Fetches the dashboard, switches each question in its dashcards to the target DB, remaps parameter_mappings field IDs, creates a new dashboard with the same structure (name, description, collection, parameters, dashcards with new card_ids and same positions/size_x/size_y), and updates it.
 
 Notes:
 - `--collection-id root` saves to the root collection (omits `collection_id` in payload). To save to a specific collection, pass its numeric ID, e.g. `--collection-id 42`.
